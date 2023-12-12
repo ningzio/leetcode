@@ -39,7 +39,7 @@
 # 示例 2:
 #
 #
-# 输入: nums = [2,3,0,1,4]
+# 输入: nums = [2,3,0,2,0,1]
 # 输出: 2
 #
 #
@@ -61,7 +61,34 @@ from typing import List
 
 class Solution:
     def jump(self, nums: List[int]) -> int:
-        pass
+        """
+        从起点和起点能跳过的最远距离中, 找到下一个能跳最远的作为落点
+        记录跳的次数
+        并记录跳的距离, 大于等于 nums.length 结束
+        """
+        count = 0
+        i = 0
+        while i < len(nums) - 1:
+            count += 1
+            if i + nums[i] >= len(nums) - 1:
+                return count
+            # 在 i + 1 ~ i + 1 + nums[i] 中寻找下一个落脚点
+            # 能跳的最远的
+            max_dis = 0
+            for j in range(i + 1, i + 1 + nums[i]):
+                dis = j + nums[j]
+                # 提前结束
+                if dis >= len(nums) - 1:
+                    return count + 1
+                if dis > max_dis:
+                    max_dis = dis
+                    i = j
+
+        return count
 
 
 # @lc code=end
+
+
+if __name__ == "__main__":
+    print(Solution().jump([2, 3, 0, 2, 1]))
