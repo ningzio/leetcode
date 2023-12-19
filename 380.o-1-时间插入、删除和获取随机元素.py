@@ -66,39 +66,56 @@
 
 
 # @lc code=start
+from collections import defaultdict
 import random
 
 
 class RandomizedSet:
     def __init__(self):
-        self.store = set()
-        self.rand = self._get_random()
+        self.m = dict()
+        self.l = list()
         self.count = 0
+        self.rand = self._get_random()
 
     def _get_random(self) -> int:
         return random.randint(0, 1 << 64 - 1)
 
     def insert(self, val: int) -> bool:
-        if val in self.store:
+        # 已存在
+        if self.m.get(val, -1) >= 0:
             return False
-        self.store.add(val)
+        self.l.append(val)
+        self.m[val] = self.count
         self.count += 1
         return True
 
     def remove(self, val: int) -> bool:
-        if val in self.store:
-            self.store.remove(val)
-            self.count -= 1
-            return True
-        return False
+        index = self.m.get(val, -1)
+        # 不存在
+        if index < 0:
+            return False
+
+        # 如果是最后有一个元素, 直接移除
+        if index == self.count - 1:
+            self.l.pop()
+        else:
+            # 最后一个元素移动到 index 处并移除最后一个元素
+            last = self.l.pop()
+            self.l[index] = last
+            self.m[last] = index
+        del self.m[val]
+        self.count -= 1
+        return True
 
     def getRandom(self) -> int:
-        x = list(self.store)
-        res = x[(self.rand & self.count) - 1]
-        self.rand >>= self.count.bit_length()
-        if self.rand == 0:
-            self.rand = self._get_random()
-        return res
+        return random.choice(self.l)
+        # if self.count == 0:
+        #     return None
+        # res = self.l[(self.rand % self.count) - 1]
+        # self.rand >>= 1
+        # if self.rand == 0:
+        #     self.rand = self._get_random()
+        # return res
 
 
 # Your RandomizedSet object will be instantiated and called as such:
@@ -113,8 +130,15 @@ if __name__ == "__main__":
     obj = RandomizedSet()
 
     obj.insert(1)
-    obj.insert(2)
-    obj.insert(3)
+    obj.insert(10)
+    obj.insert(20)
+    obj.insert(30)
 
-    for i in range(10):
-        print(obj.getRandom())
+    d = defaultdict(int)
+
+    for i in range(1000):
+        x = obj.getRandom()
+        d[x] += 1
+
+    for k, v in d.items():
+        print(f"{k}: {v / 1000 * 100}%")
